@@ -1,24 +1,17 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
 	"time"
-	"flag"
 )
 
-var addr = []mail.Address{
-	mail.Address{"Divya Surana", "divyas@rssoftware.co.in"},
-	mail.Address{"Surabhi Gupta", "surabhig@rssoftware.co.in"},
-	mail.Address{"Khusbu Mishra", "khusbum@rssoftware.co.in"},
-	mail.Address{"Shreya Ganguly", "shreya.ganguly99@gmail.com"},
-	mail.Address{"Anirban Gupta", "anirbang@rssoftware.co.in"},
-	mail.Address{"Pratik Kumar Singh", "pratiks@rssoftware.co.in"},
-}
-var payloadold Feed
+var addr = make([]mail.Address,0)
 
+var payloadold Feed
 
 func FindDifference(feedold Feed, feednew []Feed) int {
 	var index int
@@ -34,42 +27,45 @@ func FindDifference(feedold Feed, feednew []Feed) int {
 	return index
 
 }
-func FetchAndDispatch(mailer FeedMailer) {
+func FetchAndDispatch(mailer FeedMailer,addr []mail.Address) {
 	payloadnew, err := GetFeed("golang")
 	if err != nil {
 		log.Println("Error encountered")
 	}
+	if len(addr) >0{
 	if len(payloadold.URL) == 0 && len(payloadold.Title) == 0 {
 		mailer.Send(addr, payloadnew)
-	}
+	} else {
 	index := FindDifference(payloadold, payloadnew)
-	payloadold.URL = payloadnew[0].URL
-	payloadold.Title = payloadnew[0].Title
 	if index != -1 {
-		mailer.Send(addr, payloadnew)
+		mailer.Send(addr, payloadnew[:index])
 	}
+}
+payloadold.URL = payloadnew[0].URL
+payloadold.Title = payloadnew[0].Title
+}
 }
 
 func FeedDispatcher(mailer FeedMailer) {
 	ticker := time.NewTicker(time.Second * 5)
 	defer ticker.Stop()
 	for range ticker.C {
-		go FetchAndDispatch(mailer)
+		go FetchAndDispatch(mailer,addr)
 	}
 }
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "%s", *r)
+	fmt.Fprintf(w, "%s", r.URL)
 }
 
 func main() {
 	log.Println("Starting reddit mailer")
 	var server = flag.String("server", "", "for giving the server name")
-	var port  = flag.Int("port",0,"for giving the port number")
-	var password = flag.String("password","XXXX","for giving the password")
-	var auth_user = flag.String("auth-user","","for giving the authorized user email")
-	var senderMail= flag.String("sendermail", "mail", "sender email")
-	var senderName= flag.String("sendername", "name", "sender name")
+	var port = flag.Int("port", 0, "for giving the port number")
+	var password = flag.String("password", "XXXX", "for giving the password")
+	var auth_user = flag.String("auth-user", "", "for giving the authorized user email")
+	var senderMail = flag.String("sendermail", "mail", "sender email")
+	var senderName = flag.String("sendername", "name", "sender name")
 	flag.Parse()
 	mailer := NewMailer(
 		*server,
@@ -80,6 +76,9 @@ func main() {
 	)
 	go FeedDispatcher(mailer)
 
-	http.HandleFunc("/", RootHandler)
+
+	http.HandleFunc("/subscribe", InsertHandler)
+	http.HandleFunc("/", formHandler)
+	http.HandleFunc("/unsubscribe/",DeleteHandler)
 	http.ListenAndServe(":8080", nil)
 }

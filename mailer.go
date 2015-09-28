@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net/mail"
 	"net/smtp"
+	//"log"
 )
 
 type FeedMailer struct {
@@ -23,11 +24,12 @@ const tpl = `
 	<title>Go News</title>
 </head>
 <body>
-	<ul>
-	{{range .}}
+<ul>
+	{{range .Mailfeeds}}
 		<li><a href="{{ .URL }}">{{ .Title }}</a></li>
 	{{end}}
 	</ul>
+	<p><b><font color ="red"> To unsubscribe click  <a href="{{ .UnsubscribeURL }}">here </a></font></b></p>
 </body>
 </html>`
 
@@ -63,13 +65,20 @@ func (m *FeedMailer) MakeHeader(recipient mail.Address) string {
 func (m *FeedMailer) MailBody(feeds []Feed, receipient mail.Address) []byte {
 
 	t, err := template.New("webpage").Parse(tpl)
-
+   type MailDetails struct {
+		 Mailfeeds []Feed
+		 UnsubscribeURL  string
+	 }
+	 var md MailDetails
+	 for _,v := range feeds {
+		 md.Mailfeeds = append(md.Mailfeeds,Feed{v.URL,v.Title})
+	 }
+	md.UnsubscribeURL = "http://localhost:8080/unsubscribe/"+receipient.Address
 	var buff bytes.Buffer
-	err = t.Execute(&buff, feeds)
+	err = t.Execute(&buff, md)
 	if err != nil {
 		return make([]byte, 0)
 	}
-
 	return []byte(m.MakeHeader(receipient) + buff.String())
 }
 

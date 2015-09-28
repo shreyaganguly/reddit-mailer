@@ -27,7 +27,7 @@ func GetFeed(term string) ([]Feed, error) {
 
 	feeds := make([]Feed, 0)
 
-	url := fmt.Sprintf("http://reddit.com/r/%s.json", term)
+	url := fmt.Sprintf("http://reddit.com/r/%s/new.json", term)
 
 	response, err := http.Get(url)
 
