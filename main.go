@@ -63,6 +63,8 @@ func main() {
 	var auth_user = flag.String("auth-user", "", "for giving the authorized user email")
 	var senderMail = flag.String("sendermail", "mail", "sender email")
 	var senderName = flag.String("sendername", "name", "sender name")
+	var host = flag.String("b", "0.0.0.0", "Binds to the specified IP")
+  var listenport = flag.Int("p", 8080, "Listens on the specified port")
 	flag.Parse()
 	mailer := NewMailer(
 		*server,
@@ -73,9 +75,9 @@ func main() {
 	)
 	go FeedDispatcher(mailer)
 
-
+  addr := fmt.Sprintf("%s:%d",*host,*listenport)
 	http.HandleFunc("/subscribe", InsertHandler)
 	http.HandleFunc("/", formHandler)
 	http.HandleFunc("/unsubscribe/",DeleteHandler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(addr, nil)
 }
