@@ -15,12 +15,13 @@ var payloadold Feed
 
 func FindDifference(feedold Feed, feednew []Feed) int {
 	var index int
+	if len(feedold.URL) > 0 && len(feedold.Title) > 0 {
 	for i, _ := range feednew {
 		if feednew[i].URL == feedold.URL && feednew[i].Title == feedold.Title {
 			index = i
 		}
 	}
-
+}
 	if index == 0 {
 		return -1
 	}
@@ -33,14 +34,10 @@ func FetchAndDispatch(mailer FeedMailer,addr []mail.Address) {
 		log.Println("Error encountered")
 	}
 	if len(addr) >0{
-	if len(payloadold.URL) == 0 && len(payloadold.Title) == 0 {
-		mailer.Send(addr, payloadnew)
-	} else {
 	index := FindDifference(payloadold, payloadnew)
 	if index != -1 {
 		mailer.Send(addr, payloadnew[:index])
 	}
-}
 payloadold.URL = payloadnew[0].URL
 payloadold.Title = payloadnew[0].Title
 }
