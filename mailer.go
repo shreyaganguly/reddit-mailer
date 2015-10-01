@@ -65,15 +65,15 @@ func (m *FeedMailer) MakeHeader(recipient mail.Address) string {
 func (m *FeedMailer) MailBody(feeds []Feed, receipient mail.Address) []byte {
 
 	t, err := template.New("webpage").Parse(tpl)
-   type MailDetails struct {
-		 Mailfeeds []Feed
-		 UnsubscribeURL  string
-	 }
-	 var md MailDetails
-	 for _,v := range feeds {
-		 md.Mailfeeds = append(md.Mailfeeds,Feed{v.URL,v.Title})
-	 }
-	md.UnsubscribeURL = "http://localhost:8080/unsubscribe/"+receipient.Address
+	type MailDetails struct {
+		Mailfeeds      []Feed
+		UnsubscribeURL string
+	}
+	var md MailDetails
+	for _, v := range feeds {
+		md.Mailfeeds = append(md.Mailfeeds, Feed{v.URL, v.Title})
+	}
+	md.UnsubscribeURL = "http://localhost:8080/unsubscribe/" + receipient.Address
 	var buff bytes.Buffer
 	err = t.Execute(&buff, md)
 	if err != nil {
