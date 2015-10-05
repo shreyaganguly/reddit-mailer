@@ -73,7 +73,8 @@ func (m *FeedMailer) MailBody(feeds []Feed, receipient mail.Address) []byte {
 	for _, v := range feeds {
 		md.Mailfeeds = append(md.Mailfeeds, Feed{v.URL, v.Title})
 	}
-	md.UnsubscribeURL = "http://localhost:8080/unsubscribe/" + receipient.Address
+	URLpart := fmt.Sprintf("%s:%d",*host,*listenport)
+	md.UnsubscribeURL = URLpart +"/unsubscribe/" + receipient.Address
 	var buff bytes.Buffer
 	err = t.Execute(&buff, md)
 	if err != nil {
