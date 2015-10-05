@@ -18,7 +18,7 @@ func InsertHandler(w http.ResponseWriter, r *http.Request) {
 	newSubscriber.Address = r.FormValue("Email-id")
 	if newSubscriber.Address == "" {
 		fmt.Fprintf(w, "Sorry the email field cannot be left empty")
-	} else if isPresent(newSubscriber, subscriptionList) == true {
+	} else if isPresent(newSubscriber.Address) == true {
 		fmt.Fprintf(w, "Sorry the email address is already taken")
 	} else {
 		AddSubscriber(newSubscriber)

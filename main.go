@@ -26,7 +26,7 @@ func FindDifference(feedold Feed, feednew []Feed) int {
 	return index
 
 }
-func FetchAndDispatch(mailer FeedMailer, addr []mail.Address) {
+func FetchAndDispatch(mailer FeedMailer, addr map[string]mail.Address) {
 	payloadnew, err := GetFeed("golang")
 	if err != nil {
 		log.Println("Error encountered")

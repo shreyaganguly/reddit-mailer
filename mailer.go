@@ -90,8 +90,8 @@ func (m *FeedMailer) SendTo(recipient mail.Address, feeds []Feed) {
 	smtp.SendMail(m.ServerName(), m.Auth, m.Sender.Address, []string{recipient.Address}, m.MailBody(feeds, recipient))
 }
 
-func (m *FeedMailer) Send(receipients []mail.Address, feeds []Feed) {
-	for i := 0; i < len(receipients); i++ {
-		m.SendTo(receipients[i], feeds)
+func (m *FeedMailer) Send(receipients map[string]mail.Address, feeds []Feed) {
+	for _,value := range receipients {
+		m.SendTo(value, feeds)
 	}
 }
